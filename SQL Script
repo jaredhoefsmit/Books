@@ -1,0 +1,53 @@
+/*
+1. Create a table called “Books” that has 3 columns:
+	a. Author ID which holds a number
+	b. Title which holds a string
+	c. Revision which holds a number
+*/
+
+CREATE TABLE #Books
+  (Author_ID INT --IDENTITY(1,1) PRIMARY KEY
+   , Title VARCHAR(255)
+   , Revision INT DEFAULT('1')
+   )
+
+/*
+2. Populate the table with 100 rows.
+*/
+  
+DECLARE @Counter INT = 1, @Letter VARCHAR = 'A'
+  
+WHILE @Counter <=100
+
+BEGIN
+	INSERT INTO #Books (Author_ID, Title)
+	SELECT @Counter, @Letter + CAST(@Counter AS VARCHAR(3))
+  
+	SET @Counter = @Counter + 1
+	SET @Letter = CASE WHEN @Letter = 'Z' THEN 'A' ELSE CHAR(ASCII(@Letter) + 1) END
+END
+
+/*
+Copy the data such that Author ID and Title stay the same, but the revision for each is set to 2
+*/
+
+INSERT INTO #Books (Author_ID, Title, Revision)
+SELECT Author_ID, Title, '2'
+FROM #Books
+
+/*
+4. Add a constraint to the table to enforce that each record is unique.
+*/
+ALTER TABLE #Books ADD CONSTRAINT UniqueRows UNIQUE(Author_ID, Title, Revision)
+
+/*
+5. Remove the 2nd revision of records for all odd numbered Author IDs.
+*/
+DELETE
+FROM #Books
+WHERE Revision = '2' AND Author_id % 2 <> 0
+
+SELECT *
+FROM #Books
+
+DROP TABLE #Books
